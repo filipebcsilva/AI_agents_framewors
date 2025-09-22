@@ -10,13 +10,13 @@ from atomic_agents.context import ChatHistory, SystemPromptGenerator
 from atomic_agents import AtomicAgent, AgentConfig, BasicChatInputSchema, BasicChatOutputSchema,BaseIOSchema
 
 class CustomOutputSchema(BaseIOSchema):
-
+    
+    """A clear and concise description of what this schema is for."""
+     
     chat_message: str = Field(
-        ...,
         description="The chat message exchanged between the user and the chat agent.",
     )
     suggested_user_questions: List[str] = Field(
-        ...,
         description="A list of suggested follow-up questions the user could ask the agent.",
     )
 
