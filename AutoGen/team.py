@@ -6,10 +6,12 @@ from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_agentchat.ui import Console
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 
+import os
+from dotenv import load_dotenv
 
 model_client = OpenAIChatCompletionClient(
     model="gemini-2.5-flash",
-    api_key="AIzaSyDv_8QbuzZuPn_sXhrKW-4o5LAn0tJxltU",
+    api_key=os.getenv("GEMINI_API_KEY"),
 )
 
 primary_agent = AssistantAgent(

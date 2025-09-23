@@ -7,12 +7,16 @@ from typing import TypedDict, List
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, Field
 from typing import Literal
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class AgentState(TypedDict):
     messages: List[BaseMessage]
     next_agent: str 
     
-model = ChatGoogleGenerativeAI(model="gemini-2.5-flash",api_key = "AIzaSyDv_8QbuzZuPn_sXhrKW-4o5LAn0tJxltU")
+model = ChatGoogleGenerativeAI(model="gemini-2.5-flash",api_key = os.getenv("GEMINI_API_KEY"))
 
 class SupervisorRouter(BaseModel):
     next_agent: Literal["agent_1", "agent_2", "__end__"] = Field(

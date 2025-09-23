@@ -2,9 +2,14 @@ from langchain.chat_models import init_chat_model
 from langchain_core.messages import AnyMessage
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt.chat_agent_executor import AgentState
 from langgraph.prebuilt import create_react_agent
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class WeatherResponse(BaseModel):
     conditions: str
@@ -24,10 +29,8 @@ def get_weather(city: str) -> str:
     return f"It's always sunny in {city}!"
 
 
-model = init_chat_model(
-    "groq:llama-3.1-8b-instant",
-    temperature = 0,
-)
+model = ChatGoogleGenerativeAI(model="gemini-2.5-flash",api_key = os.getenv("GEMINI_API_KEY"))
+
 
 agent = create_react_agent(
     model=model,

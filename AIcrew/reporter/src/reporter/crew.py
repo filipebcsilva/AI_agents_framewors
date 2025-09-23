@@ -6,17 +6,15 @@ from crewai import LLM
 from dotenv import load_dotenv
 import os
 from typing import List
-# If you want to run a snippet of code before or after the crew starts,
-# you can use the @before_kickoff and @after_kickoff decorators
-# https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
+
 
 load_dotenv()
 
 llm = LLM(
-    model='gemini/gemini-2.5-flash',
-    api_key="AIzaSyDv_8QbuzZuPn_sXhrKW-4o5LAn0tJxltU"
+    model= 'gemini/gemini-2.5-flash',
+    api_key=os.getenv("GEMINI_API_KEY")
 )
-
+print("gemini/" + os.getenv("MODEL"),)
 @CrewBase
 class Reporter():
     """Reporter crew"""
@@ -24,9 +22,6 @@ class Reporter():
     agents: List[BaseAgent]
     tasks: List[Task]
    
-    # If you would like to add tools to your agents, you can learn more about it here:
-    # https://docs.crewai.com/concepts/agents#agent-tools
-    
     ##AGENTES##
     @agent
     def web_researcher(self) -> Agent:
@@ -101,14 +96,11 @@ class Reporter():
     
     @crew
     def crew(self) -> Crew:
-        """Creates the Reporter crew"""
-        # To learn how to add knowledge sources to your crew, check out the documentation:
-        # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
-
+        
         return Crew(
-            agents=self.agents[0:4], # Automatically created by the @agent decorator
-            tasks=self.tasks, # Automatically created by the @task decorator
+            agents=self.agents[0:4],
+            tasks=self.tasks, 
             manager_agent = self.agents[4],
             verbose=True,
-            process=Process.hierarchical # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
+            process=Process.hierarchical
         )

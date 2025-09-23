@@ -63,7 +63,6 @@ client = instructor.from_openai(openai.OpenAI(api_key="AIzaSyDv_8QbuzZuPn_sXhrKW
 orchestrator_agent_config = AgentConfig(
     client=client,
     model="gemini-2.5-flash",
-    model_api_parameters={"reasoning_effort": "low"},
     system_prompt_generator=SystemPromptGenerator(
         background=[
             "You are an Orchestrator Agent that decides between using a search tool or a calculator tool based on user input.",
@@ -71,23 +70,18 @@ orchestrator_agent_config = AgentConfig(
             "Use the calculator tool for mathematical calculations and expressions.",
         ],
         output_instructions=[
-            """
-            Analyze the input to determine whether it requires a web search or a calculation.
-            Each turn, you MUST choose only one tool.Your output must be a single JSON object, never a List.
-            For search queries, use the 'search' tool and provide 1-3 relevant search queries.
-            For calculations, use the 'calculator' tool and provide the mathematical expression to evaluate.
-            When using the 'calculator' tool, you MUST giva a valid math expression in string format.
-            The expression needs to be something Sympy can understand.
-            When uncertain, prefer using the search tool.
-            Format the output using the appropriate schema.
-            Example of questinos and tools:
-            Question 1: Who won the oscar in 2023
-            Tool: searxng_search_tool
-            Paramaters: {"query": "Who won the oscar in 2023"}
-            Question 2: How much is 10 times 30
-            Tool: calculator_tool
-            Parameters: {"expression": "10 * 30"}
-            """
+            "Analyze the input to determine whether it requires a web search or a calculation.",
+            "You MUST choose only one tool. If you output a list, the system will fail." ,
+            "Your response MUST be a single ONE valid JSON object.",
+            "For search queries, use the 'search' tool and provide 1-3 relevant search queries.",
+            "For calculations and math expressions, use the 'calculator' tool and provide the mathematical expression to evaluate.",
+            "The mathematical expression MUST be unique and not divided in two tools calls.",   
+            "Example 1",
+            "Who won the oscar in 2023",
+            "Choose the SearXNG tool and return a JSON like this {'query': 'Who won the oscar in 2023'}",
+            "Example 2",
+            "Calculate 10 times 30 to the second power",
+            "Choose the calculator tool and return a single JSON like this {'expression': '(10 * 30)²'}",
         ],
     ),
 )
@@ -120,48 +114,39 @@ if __name__ == "__main__":
     load_dotenv()
 
     
-    client = instructor.from_openai(openai.OpenAI(api_key="AIzaSyDv_8QbuzZuPn_sXhrKW-4o5LAn0tJxltU",
-                                            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"))
+    client = instructor.from_openai(openai.OpenAI(api_key=os.getenv("GEMINI_API_KEY"),
+                                            base_url=os.getenv("GEMINI_BASE_URL")))
 
     console = Console()
 
-    # Initialize the tools
-    searxng_tool = SearXNGSearchTool(SearXNGSearchToolConfig(base_url="https://search.inetol.net/", max_results=5))
+    searxng_tool = SearXNGSearchTool(SearXNGSearchToolConfig(base_url=os.getenv("SEARXNG_URL"), max_results=5))
     calculator_tool = CalculatorTool(CalculatorToolConfig())
 
-    # Print the full system prompt
     console.print(Panel(orchestrator_agent.system_prompt_generator.generate_prompt(), title="System Prompt", expand=False))
     console.print("\n")
 
-    # Example inputs
     inputs = [
         "Please calculate the sine of pi/3 to the third power",
     ]
     for user_input in inputs:
         console.print(Panel(f"[bold cyan]User Input:[/bold cyan] {user_input}", expand=False))
 
-        # Create the input schema
         input_schema = OrchestratorInputSchema(chat_message=user_input)
 
-        # Print the input schema
         console.print("\n[bold yellow]Generated Input Schema:[/bold yellow]")
         input_syntax = Syntax(str(input_schema.model_dump_json(indent=2)), "json", theme="monokai", line_numbers=True)
         console.print(input_syntax)
-
-        # Run the orchestrator to get the tool selection and input
+        
         orchestrator_output = orchestrator_agent.run(input_schema)
 
-        # Print the orchestrator output
         console.print("\n[bold magenta]Orchestrator Output:[/bold magenta]")
         orchestrator_syntax = Syntax(
             str(orchestrator_output.model_dump_json(indent=2)), "json", theme="monokai", line_numbers=True
         )
         console.print(orchestrator_syntax)
 
-        # Run the selected tool
         response = execute_tool(searxng_tool, calculator_tool, orchestrator_output)
 
-        # Print the tool output
         console.print("\n[bold green]Tool Output:[/bold green]")
         output_syntax = Syntax(str(response.model_dump_json(indent=2)), "json", theme="monokai", line_numbers=True)
         console.print(output_syntax)

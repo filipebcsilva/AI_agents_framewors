@@ -8,6 +8,9 @@ from typing import List
 from pydantic import Field
 from atomic_agents.context import ChatHistory, SystemPromptGenerator
 from atomic_agents import AtomicAgent, AgentConfig, BasicChatInputSchema, BasicChatOutputSchema,BaseIOSchema
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class CustomOutputSchema(BaseIOSchema):
     
@@ -32,8 +35,8 @@ initial_message = CustomOutputSchema(
 )
 history.add_message("assistant", initial_message)
 
-client = instructor.from_openai(openai.OpenAI(api_key="AIzaSyDv_8QbuzZuPn_sXhrKW-4o5LAn0tJxltU",
-                                            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"))
+client = instructor.from_openai(openai.OpenAI(api_key=os.getenv("GEMINI_API_KEY"),
+                                            base_url=os.getenv("GEMINI_BASE_URL")))
 
 system_prompt_generator = SystemPromptGenerator(
     background=[
