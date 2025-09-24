@@ -9,7 +9,9 @@ from datetime import datetime
 from pydantic import Field
 from atomic_agents import AtomicAgent, AgentConfig, BaseIOSchema
 from atomic_agents.context import SystemPromptGenerator, BaseDynamicContextProvider
+from dotenv import load_dotenv
 
+load_dotenv()
 
 from tools.searxng_search import (
     SearXNGSearchTool,
@@ -56,10 +58,9 @@ class OrchestratorAgentConfig(AgentConfig):
 
     searxng_config: SearXNGSearchToolConfig
     calculator_config: CalculatorToolConfig
-
-client = instructor.from_openai(openai.OpenAI(api_key="AIzaSyDv_8QbuzZuPn_sXhrKW-4o5LAn0tJxltU",
-                                            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"))
-
+    
+client = instructor.from_openai(openai.OpenAI(api_key=os.getenv("GEMINI_API_KEY"),
+                                            base_url=os.getenv("GEMINI_BASE_URL")))
 orchestrator_agent_config = AgentConfig(
     client=client,
     model="gemini-2.5-flash",
