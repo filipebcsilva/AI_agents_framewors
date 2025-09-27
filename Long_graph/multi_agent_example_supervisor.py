@@ -124,23 +124,6 @@ builder.add_node(agent_2)
 
 builder.set_entry_point("supervisor")
 
-
-def router_function(state: AgentState) -> str:
-    return state["next_agent"]
-
-builder.add_conditional_edges(
-    "supervisor",
-    router_function,
-    {
-        "agent_1": "agent_1",
-        "agent_2": "agent_2",
-        "__end__": END
-    }
-)
-
-builder.add_edge("agent_1", "supervisor")
-builder.add_edge("agent_2", "supervisor")
-
 graph = builder.compile()
 
 if __name__ == "__main__":

@@ -154,38 +154,9 @@ builder.add_node(agent_3)
 
 builder.set_entry_point("agent_1")
 
-def router_function(state: AgentState) -> str:
-    return state["next_agent"]
-
-builder.add_conditional_edges(
-    "agent_1",
-    router_function,
-    {
-        "agent_2": "agent_2",
-        "agent_3": "agent_3",
-        "__end__": END
-    }
-)
-builder.add_conditional_edges(
-    "agent_2",
-    router_function,
-    {
-        "agent_1": "agent_1",
-        "agent_3": "agent_3",
-        "__end__": END
-    }
-)
-builder.add_conditional_edges(
-    "agent_3",
-    router_function,
-    {
-        "agent_1": "agent_1",
-        "agent_2": "agent_2",
-        "__end__": END
-    }
-)
-
 network = builder.compile()
+
+print(network.get_graph().draw_ascii())
 
 if __name__ == "__main__":
     initial_state = {
