@@ -3,14 +3,12 @@ from PIL import Image
 from dotenv import load_dotenv
 from reasoning_plot import check_reasoning_and_plot
 from plane_time import calculate_cargo_travel_time
-from smolagents import CodeAgent, GoogleSearchTool, InferenceClientModel, VisitWebpageTool,DuckDuckGoSearchTool
+from smolagents import CodeAgent,VisitWebpageTool,DuckDuckGoSearchTool,LiteLLMModel
 
 load_dotenv()
 
-model = InferenceClientModel(token = os.getenv("HUGGING_FACE_TOKEN"), max_tokens = 8096)
-
-task = """Find all Batman filming locations in the world, calculate the time to transfer via cargo plane to here (we're in Gotham, 40.7128° N, 74.0060° W), and return them to me as a pandas dataframe.
-Also give me some supercar factories with the same cargo plane transfer time."""
+model = LiteLLMModel(model_id="gemini/gemini-2.5-flash",
+                     api_key=os.getenv("GEMINI_API_KEY"))
 
 web_agent = CodeAgent(
     model=model,
@@ -24,7 +22,7 @@ web_agent = CodeAgent(
 web_agent.planning_interval = 4
 
 manager_agent = CodeAgent(
-    model=InferenceClientModel("deepseek-ai/DeepSeek-R1", provider="together", max_tokens=8096),
+    model=model,
     tools=[calculate_cargo_travel_time],
     managed_agents=[web_agent],
     additional_authorized_imports=[

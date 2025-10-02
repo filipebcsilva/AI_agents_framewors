@@ -20,7 +20,8 @@ searcher = Agent(
         Dado um certo tópico, crie uma lista de 3 termos relacionados a o tópico
         Para cada termo, procure na web e analise os resultados.
         Retorne as 10 Urls mais relevantes do tópico
-    """
+    """,
+    debug_mode = True,
 )
 
 writer = Agent(
@@ -36,6 +37,7 @@ writer = Agent(
         4. Foque em fatos reais e não invente informações
         Você é um escritor do New York, logo a qualidade do artigo é muito importante
     """,
+    debug_mode = True,
     tools= [Newspaper4kTools],
     add_datetime_to_context=True,
 )

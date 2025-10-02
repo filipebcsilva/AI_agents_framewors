@@ -1,8 +1,9 @@
 from typing import Literal
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.types import Command
+from IPython.display import Image, display
 from langchain_core.messages import SystemMessage, HumanMessage,AIMessage
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import StateGraph, END
 from typing import TypedDict, List
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, Field
@@ -19,8 +20,8 @@ class AgentState(TypedDict):
 model = ChatGoogleGenerativeAI(model="gemini-2.5-flash",api_key = os.getenv("GEMINI_API_KEY"))
 
 class SupervisorRouter(BaseModel):
-    next_agent: Literal["agent_1", "agent_2", "__end__"] = Field(
-        description="The name of the next agent.If the question is about products, go to 'agent_1'.If the question is about finance and subscriptions, go to 'agent_2'. " 
+    next_agent: Literal["product_agent", "subscription_agent", "__end__"] = Field(
+        description="The name of the next agent.If the question is about products, go to 'product_agent'.If the question is about finance and subscriptions, go to 'subscription_agent'. " 
         "If the question was answered use __end__ to end the conversation."
     )
     content: str = Field(
@@ -40,17 +41,17 @@ supervisor_model = model.with_structured_output(SupervisorRouter)
 worker_model = model.with_structured_output(WorkerRouter)
 
 
-def supervisor(state: AgentState) -> Command[Literal["agent_1", "agent_2", END]]:
+def supervisor(state: AgentState) -> Command[Literal["product_agent", "subscription_agent", END]]:
     system_prompt = """
             Your task is to analyse the conversation and decide which one of the agents should
-            be next: 'agent_1' or 'agent_2'.
+            be next: 'product_agent' or 'subscription_agent'.
             ROUTING RULES:
             1. FOCUS on the user's last message (HumanMessage). Ignore responses from other agents.
-            2. If the user's last question is about features or product usage, choose 'agent_1'.
-            3. If the user's last question is about pricing, subscriptions, or billing, choose 'agent_2'.
+            2. If the user's last question is about features or product usage, choose 'product_agent'.
+            3. If the user's last question is about pricing, subscriptions, or billing, choose 'subscription_agent'.
 
             ENDING RULES:
-            4. If the last message in the history was a complete response from an expert (agent_1 or agent_2) and the user did not ask a new question, the task is complete. Choose '__end__'.
+            4. If the last message in the history was a complete response from an expert (product_agent or subscription_agent) and the user did not ask a new question, the task is complete. Choose '__end__'.
 
             DO NOT attempt to answer the question. Your response in the 'content' field should ONLY be a short status message, reflecting the action taken.
 
@@ -70,10 +71,15 @@ def supervisor(state: AgentState) -> Command[Literal["agent_1", "agent_2", END]]
         update=update_dict,
     )
 
-def agent_1(state: AgentState) -> Command[Literal["supervisor"]]:
+def product_agent(state: AgentState) -> Command[Literal["supervisor"]]:
     system_prompt = """
-            You are product especialist. Your task is to answer questions about the funcionality of our sorftware and then
+            You are product especialist. Your task is to answer questions about the products of our shop and then
             return the control to the supervisor.
+            ---PRODUCT INFORMATION---
+            - Notebook: 500$ or 5x100$
+            - TV: 200$ or 4x50$
+            - Iphone 17:1000$ or 2x500$.
+            --------------------------
             """
             
     messages = [SystemMessage(content=system_prompt)] + state["messages"]
@@ -91,9 +97,9 @@ def agent_1(state: AgentState) -> Command[Literal["supervisor"]]:
         update=update_dict,
     )
 
-def agent_2(state: AgentState) -> Command[Literal["supervisor"]]:
+def subscription_agent(state: AgentState) -> Command[Literal["supervisor"]]:
     system_prompt = """
-            You are finances and subscriptions especialist. Your task is to answer questions about the funcionality of our sorftware and then
+            You are finances and subscriptions especialist. Your task is to answer questions about the subscriptions of our sorftware and then
             return the control to the supervisor.
             --- INTERNAL INFORMATION ---
             - Basic Plan: $10 per month or $100 per year. Includes features X, Y, and Z.
@@ -119,29 +125,16 @@ def agent_2(state: AgentState) -> Command[Literal["supervisor"]]:
 
 builder = StateGraph(AgentState)
 builder.add_node(supervisor)
-builder.add_node(agent_1)
-builder.add_node(agent_2)
+builder.add_node(product_agent)
+builder.add_node(subscription_agent)
 
 builder.set_entry_point("supervisor")
 
-
-def router_function(state: AgentState) -> str:
-    return state["next_agent"]
-
-builder.add_conditional_edges(
-    "supervisor",
-    router_function,
-    {
-        "agent_1": "agent_1",
-        "agent_2": "agent_2",
-        "__end__": END
-    }
-)
-
-builder.add_edge("agent_1", "supervisor")
-builder.add_edge("agent_2", "supervisor")
-
 graph = builder.compile()
+
+
+png_data = graph.get_graph().draw_mermaid_png(max_retries=5,retry_delay=2.0)
+display(Image(png_data))
 
 if __name__ == "__main__":
     initial_state = {

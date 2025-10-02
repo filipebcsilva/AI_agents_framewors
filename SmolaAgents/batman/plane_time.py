@@ -29,14 +29,12 @@ def calculate_cargo_travel_time(
     def to_radians(degrees: float) -> float:
         return degrees * (math.pi / 180)
 
-    # Extract coordinates
+
     lat1, lon1 = map(to_radians, origin_coords)
     lat2, lon2 = map(to_radians, destination_coords)
 
-    # Earth's radius in kilometers
     EARTH_RADIUS_KM = 6371.0
 
-    # Calculate great-circle distance using the haversine formula
     dlon = lon2 - lon1
     dlat = lat2 - lat1
 
@@ -47,12 +45,8 @@ def calculate_cargo_travel_time(
     c = 2 * math.asin(math.sqrt(a))
     distance = EARTH_RADIUS_KM * c
 
-    # Add 10% to account for non-direct routes and air traffic controls
     actual_distance = distance * 1.1
 
-    # Calculate flight time
-    # Add 1 hour for takeoff and landing procedures
     flight_time = (actual_distance / cruising_speed_kmh) + 1.0
 
-    # Format the results
     return round(flight_time, 2)

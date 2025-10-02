@@ -1,6 +1,5 @@
 from crewai import Agent, LLM
 import os
-from crewai_tools import BraveSearchTool
 from dotenv import load_dotenv
 
 load_dotenv()

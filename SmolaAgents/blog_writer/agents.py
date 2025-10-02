@@ -4,6 +4,7 @@ from smolagents import (
     LiteLLMModel,
     DuckDuckGoSearchTool,
 )
+
 from dotenv import load_dotenv
 import os
 
@@ -27,7 +28,6 @@ research_checker_agent = CodeAgent(
     name="research_checker",
     description="Verifica a relevância da pesquisa para a tarefa original solicitada. Se a pesquisa não for relevante, serão solicitadas mais pesquisas.",
 )
-
 writer_agent = CodeAgent(
     model = model,
     tools=[],
@@ -46,7 +46,7 @@ blog_manager = CodeAgent(
     tools=[],
     model=model,
     managed_agents=[research_agent,research_checker_agent, writer_agent,copy_editor],
-    additional_authorized_imports=["re"],
+    additional_authorized_imports=["re","json"],
     description = """Você é o gerente do blog. Você é responsavel por toda a organização.Escolha entre fazer os agentes de pesquisa, escrita e edição
     Siga estes passos:
     1. Use o research_agent para coletar informações

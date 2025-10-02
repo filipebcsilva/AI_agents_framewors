@@ -1,0 +1,6 @@
+agno==2.0.8
+google-genai==1.38.0
+ddgs==9.6.0
+newspaper4k==0.9.3.1
+lxml_html_clean==0.4.2
+openai==1.109.1

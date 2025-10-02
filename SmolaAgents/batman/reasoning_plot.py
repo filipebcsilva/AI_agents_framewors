@@ -1,5 +1,5 @@
 from smolagents.utils import encode_image_base64, make_image_url
-from smolagents import OpenAIServerModel
+from smolagents import OpenAIServerModel,LiteLLMModel
 import os
 from PIL import Image
 from dotenv import load_dotenv
@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def check_reasoning_and_plot(final_answer, agent_memory):
-    multimodal_model = OpenAIServerModel("gpt-4o", max_tokens=8096)
+    multimodal_model = LiteLLMModel(model_id="gemini/gemini-2.5-flash",
+                     api_key=os.getenv("GEMINI_API_KEY"))
     filepath = "saved_map.png"
     assert os.path.exists(filepath), "Make sure to save the plot under saved_map.png!"
     image = Image.open(filepath)
