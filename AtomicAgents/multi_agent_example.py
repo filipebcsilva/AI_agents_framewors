@@ -60,7 +60,7 @@ class OrchestratorAgentConfig(AgentConfig):
     calculator_config: CalculatorToolConfig
     
 client = instructor.from_openai(openai.OpenAI(api_key=os.getenv("GEMINI_API_KEY"),
-                                            base_url=os.getenv("GEMINI_BASE_URL")))
+                                            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"))
 orchestrator_agent_config = AgentConfig(
     client=client,
     model="gemini-2.5-flash",
@@ -116,11 +116,11 @@ if __name__ == "__main__":
 
     
     client = instructor.from_openai(openai.OpenAI(api_key=os.getenv("GEMINI_API_KEY"),
-                                            base_url=os.getenv("GEMINI_BASE_URL")))
+                                            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"))
 
     console = Console()
 
-    searxng_tool = SearXNGSearchTool(SearXNGSearchToolConfig(base_url=os.getenv("SEARXNG_URL"), max_results=5))
+    searxng_tool = SearXNGSearchTool(SearXNGSearchToolConfig(base_url="https://search.disroot.org", max_results=5))
     calculator_tool = CalculatorTool(CalculatorToolConfig())
 
     console.print(Panel(orchestrator_agent.system_prompt_generator.generate_prompt(), title="System Prompt", expand=False))

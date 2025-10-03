@@ -1,0 +1,5 @@
+instructor == 1.9.2
+atomic-agents == 2.2.0
+instructor[google-generativeai]
+google-genai == 1.41.0
+sympy == 1.14.0

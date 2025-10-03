@@ -1,2 +1,8 @@
 smolagents==1.22.0
+smolagents[litellm] == 1.22.0
+numpy == 2.3.3
+pandas == 2.3.3
+plotly == 6.3.1
+geopandas == 1.1.1
 ddgs==9.6.0
+pillow==11.3.0

@@ -7,6 +7,7 @@ from rich.text import Text
 from typing import List 
 from pydantic import Field
 from atomic_agents.context import ChatHistory, SystemPromptGenerator
+import google.generativeai as genai
 from atomic_agents import AtomicAgent, AgentConfig, BasicChatInputSchema, BasicChatOutputSchema,BaseIOSchema
 from dotenv import load_dotenv
 
@@ -24,7 +25,7 @@ class CustomOutputSchema(BaseIOSchema):
     )
 
 
-
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 console = Console()
 
 history = ChatHistory()
@@ -36,8 +37,7 @@ initial_message = CustomOutputSchema(
 history.add_message("assistant", initial_message)
 
 client = instructor.from_openai(openai.OpenAI(api_key=os.getenv("GEMINI_API_KEY"),
-                                            base_url=os.getenv("GEMINI_BASE_URL")))
-
+                                            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"))
 system_prompt_generator = SystemPromptGenerator(
     background=[
         "This assistant is a knowledgeable AI designed to be helpful, friendly, and informative.",
@@ -62,7 +62,7 @@ console.print(Panel(system_prompt_generator.generate_prompt(), width=console.wid
 agent = AtomicAgent[BasicChatInputSchema, CustomOutputSchema](
     config=AgentConfig(
         client=client,
-        model="gemini-2.5-flash",
+        model = "gemini-2.5-flash",
         history=history,
         system_prompt_generator= system_prompt_generator,
         model_api_parameters={"max_tokens": 2048}

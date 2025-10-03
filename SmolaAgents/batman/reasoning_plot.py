@@ -1,5 +1,5 @@
 from smolagents.utils import encode_image_base64, make_image_url
-from smolagents import OpenAIServerModel,LiteLLMModel
+from smolagents import LiteLLMModel
 import os
 from PIL import Image
 from dotenv import load_dotenv

@@ -3,7 +3,7 @@ from PIL import Image
 from dotenv import load_dotenv
 from reasoning_plot import check_reasoning_and_plot
 from plane_time import calculate_cargo_travel_time
-from smolagents import CodeAgent,VisitWebpageTool,DuckDuckGoSearchTool,LiteLLMModel
+from smolagents import CodeAgent,VisitWebpageTool,LiteLLMModel,GoogleSearchTool
 
 load_dotenv()
 
@@ -12,7 +12,7 @@ model = LiteLLMModel(model_id="gemini/gemini-2.5-flash",
 
 web_agent = CodeAgent(
     model=model,
-    tools=[DuckDuckGoSearchTool(), VisitWebpageTool(), calculate_cargo_travel_time],
+    tools=[GoogleSearchTool(provider = "serper"), VisitWebpageTool(), calculate_cargo_travel_time],
     name = "web_agent",
     description = "Browses the web to find information",
     verbosity_level = 0,
@@ -32,6 +32,8 @@ manager_agent = CodeAgent(
         "json",
         "pandas",
         "numpy",
+        "plotly.express",
+        "plotly.graph_objects"
     ],
     planning_interval=5,
     verbosity_level=2,
